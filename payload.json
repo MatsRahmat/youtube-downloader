@@ -1,0 +1,29 @@
+{
+  "employes": [
+    { "name": "Jajang", "salary": "12000" },
+    { "name": "nanang", "salary": "12000" },
+    { "name": "orange", "salary": "12000" }
+  ],
+  "links": [
+    {
+        "video_title": "Nightcore - TiK ToK - (Lyrics)",
+        "url": "https://www.youtube.com/watch?v=o9Xmxtg5smM"
+      },
+      {
+        "video_title": "Nightcore - In The Air - (Lyrics)",
+        "url": "https://www.youtube.com/watch?v=X7HIpposrU4"
+      },
+      {
+        "video_title": "Nightcore - The Motto - (Lyrics)",
+        "url": "https://www.youtube.com/watch?v=lDz5SUU4XUw"
+      },
+      {
+        "video_title": "Nightcore - Falling For You - (Lyrics)",
+        "url": "https://www.youtube.com/watch?v=trqeZu-ZLf8"
+      },
+      {
+        "video_title": "Nightcore - It Don't Matter - (Lyrics)",
+        "url": "https://www.youtube.com/watch?v=xJ1N0uQmryQ"
+      }
+  ]
+}
