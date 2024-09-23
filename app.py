@@ -2,10 +2,11 @@ from pytubefix import YouTube
 from pytubefix.cli import on_progress
 import os
 import time
+import math
 
 class App:
     is_loop = True
-    menus = ('Donwload','Check Data')
+    menus = ('Donwload','Check Data', 'Exit')
     choosed_menu = ""
 
     @staticmethod
@@ -30,6 +31,11 @@ class App:
                 print("Detail menu is under development, please be patien!")
                 time.sleep(1.5)
                 App.choosed_menu = ""
+            case 3:
+                App.is_loop = False
+                App.choosed_menu = ""
+            case _:
+                print("Menu doesn't exist")
 
     @staticmethod 
     def show_choosed_menu():
@@ -48,6 +54,7 @@ class App:
 #                     [ DOWNDLOAD FILE CLASSES ]
 class Download:
     save_path = ""
+    links_dirname = "links"
     is_loop = True
     menus = ('Single download','Bulk download','Playlist download', "Back to main menu")
     choosed_menu = ""
@@ -79,10 +86,10 @@ class Download:
             case 1:
                 Download.single_download()
                 Download.choosed_menu = ""
-                pass
             case 2:
                 print("Menu 2")
-                pass
+                Download.bulk_download_menu()
+                Download.choosed_menu = ""
             case 3:
                 print("Menu 3")
                 pass
@@ -94,6 +101,18 @@ class Download:
         Download.is_loop = False
         Download.choosed_menu = ""
 
+    @staticmethod
+    def bulk_download_menu():
+        bulk_menu = ("Manual input", "From file")
+        for index, menu in enumerate(bulk_menu):
+            print(f"[{index + 1}] - {menu}")
+        choosed = int(input("Select download source: "))
+        if choosed == 1:
+            Download.bukl_download_from_input()
+        elif choosed == 2:
+            Download.bulk_download_from_file()
+        elif choosed > 2:
+            print("Out of menu")
 
     @staticmethod
     def create_save_folder():
@@ -107,19 +126,69 @@ class Download:
             print("Directory is already exist. and ready to use!")
      
     @staticmethod
+    def download(url:str):
+        def show_progress_bar(stream, chunk, _file_handle, bytes_remaining):
+            current = ((stream.filesize - bytes_remaining) / stream.filesize)
+            percent = f"{current * 100:.1f}"
+            progress = int(50 * current)
+            status = "█" * progress + "-" * (50 - progress)
+            print(f" ↳ |{status}| {percent}%")
+        try:
+            yt = YouTube(url, on_progress_callback=on_progress)
+            # yt = YouTube(url)
+            # yt.register_on_progress_callback(show_progress_bar)
+            print(f"Downloading: {yt.title}")
+
+            ys = yt.streams.get_audio_only()
+            ys.download(output_path=Download.save_path, mp3=True)
+            print("\n")
+            Helper_app.print_info("Donwload complete")
+            time.sleep(1.5)
+        except Exception as e:
+            print(f"Something error: {e}")
+
+    @staticmethod
     def single_download():
         url = input("Enter url video: ")
         if url:
-            try:
-                yt = YouTube(url, on_complete_callback=on_progress)
-                print(f"Downloading: {yt.title}")
+            Download.download(url)
+            
+    @staticmethod
+    def bukl_download_from_input():
+        links = []
+        print("Type 'Done' when done inserting link")
+        while(True):
+            input_link = input("Insert link: ")
+            if input_link.lower() == "done":
+                break
+            else:
+                links.append(input_link)
+        print(f"Result link, total link = {len(links)}, download starting")
+        for link in links:
+            # print(link)
+            link = link.strip()
+            Download.download(link)
+        return
 
-                ys = yt.streams.get_audio_only()
-                ys.download(output_path=Download.save_path, mp3=True)
-                print("Donwload complete")
-                time.sleep(1.5)
-            except:
-                print("Something error")
+    @staticmethod
+    def bulk_download_from_file():
+        filename = input("Insert file name: ")
+        path = Download.links_dirname + "/" + filename
+        try:
+            if not os.path.isdir(Download.links_dirname):
+                os.mkdir(Download.links_dirname)
+            
+            print("Getting link....")
+            links = Helper_app.read_file_to_list(path)
+            print("Start downloading!")
+            for link in links:
+                link = link.strip()
+                Download.download(link)
+            Helper_app.print_info("Done downloading all!")
+            return
+        except Exception as e:
+            print(f"Something error: {e}")
+        
        
 #                          [ HELPER CLASSES ]
 class Helper_app:
@@ -137,4 +206,27 @@ class Helper_app:
         except FileExistsError:
             print("Failed create folder, folder already exist")
             return False
-    
+
+    @staticmethod
+    def read_file_to_list(path):
+        with open(path, "r") as file:
+            content = file.read()
+        return content.splitlines()
+    @staticmethod
+    def print_info(message):
+        total_leng = 40
+        content_leng = len(message)
+        empty_modulus_message = content_leng % 8
+        x =(total_leng - content_leng)
+        a = x / 8
+        b = a / 2
+        total_tabulation = math.floor(b)
+        message_text = ""
+        for i in range(total_tabulation):
+            message_text = message_text + "\t"
+        message_text = message_text + message
+
+        hr_text = "".center(total_leng, "=")
+        print(hr_text)
+        print(message_text)
+        print(hr_text)
